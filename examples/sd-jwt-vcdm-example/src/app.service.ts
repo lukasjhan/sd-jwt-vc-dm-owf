@@ -5,6 +5,7 @@ import {
   ProtectedHeaders,
   parseCerts,
   generateX5c,
+  UnprotectedHeaders,
 } from '@xevolab/jades';
 import { createPrivateKey } from 'crypto';
 import * as fs from 'fs';
@@ -30,10 +31,27 @@ export class AppService {
         x5c: generateX5c(certs),
       }),
     );
+
+    const unprotectedHeaders = new UnprotectedHeaders({
+      etsiU: [
+        {
+          sigTst: {
+            tstTokens: [
+              {
+                val: 'The Time Stamp Token (TST)',
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    jades.setUnprotectedHeaders(unprotectedHeaders);
     jades.sign('RS256', key);
 
     const token = jades.toString();
-    console.log(token);
+    const obj = jades.toObject();
+    console.log(obj);
     return token;
   }
 }
